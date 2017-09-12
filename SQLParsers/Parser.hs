@@ -11,18 +11,24 @@ data SyntaxTree = SyntaxTree {
 
 parse :: String -> String
 parse sql
-    | firstWord == "SELECT" = show tree
+    | firstWord == "SELECT" = show SyntaxTree {targetList=targets, fromClause=fromClause}
     | otherwise = error "Invalid SQL detected"
-    where firstWord = [toUpper x | x <- takeWhile ( /= ' ' ) sql]
+    where firstWord = map toUpper $ head $ words sql
           targets = extractTargets sql
-          tree = insertTarget targets $ SyntaxTree {targetList=[], fromClause=[]}
-
-insertTarget :: [String] -> SyntaxTree -> SyntaxTree
-insertTarget targets tree =
-    SyntaxTree {targetList = newTargetList, fromClause = newFromClause}
-    where newTargetList = targetList tree ++ targets
-          newFromClause = fromClause tree
+          fromClause = extractFromClause sql
 
 extractTargets :: String -> [String]
 extractTargets sql =
-    [if last x == ',' then init x else x | x <- takeWhile (/= "FROM") $ words $ map toUpper sql, x /= "SELECT"]
+    [dropSymbol x | x <- takeWhile (/= "FROM") $ words $ map toUpper sql, x /= "SELECT"]
+
+extractFromClause :: String -> [String]
+extractFromClause sql =
+    map dropSymbol afterFrom
+    where afterFrom = tail [x | x <- dropWhile (/= "FROM") $ words $ map toUpper sql]
+
+dropSymbol :: String -> String
+dropSymbol str
+    | lastChar == ',' = init str
+    | lastChar == ';' = init str
+    | otherwise       = str
+    where lastChar = last str
