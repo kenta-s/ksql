@@ -24,6 +24,5 @@ insertTarget targets tree =
           newFromClause = fromClause tree
 
 extractTargets :: String -> [String]
--- TODO: fix the behavior
 extractTargets sql =
-    [dropWhile (== ' ') $ dropWhile (/= ' ') sql]
+    [if last x == ',' then init x else x | x <- takeWhile (/= "FROM") $ words $ map toUpper sql, x /= "SELECT"]
