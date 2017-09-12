@@ -26,4 +26,4 @@ insertTarget targets tree =
 extractTargets :: String -> [String]
 -- TODO: fix the behavior
 extractTargets sql =
-    [[x | x <- dropWhile (/= ' ') sql]]
+    [dropWhile (== ' ') $ dropWhile (/= ' ') sql]
